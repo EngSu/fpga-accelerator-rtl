@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 module mac #(
     parameter DATA_WIDTH = 16,
     parameter ACC_WIDTH  = 32
