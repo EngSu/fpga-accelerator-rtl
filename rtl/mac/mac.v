@@ -1,10 +1,10 @@
 `timescale 1ns/1ps
 /////////////////////////////////////////////////////////////////////////////////
 // Company: York University
-// Engineer: Sumaya
+// Engineer: Sumaia A
 // Supervisor: Prof. Sebastian Magierowski
 //
-// Create Date: 08/20/2024
+// Create Date: 06/20/2024
 // Design Name: MAC Unit for Systolic Array Hardware Accelerator
 // Module Name: mac
 // Project Name: fpga-accelerator-rtl

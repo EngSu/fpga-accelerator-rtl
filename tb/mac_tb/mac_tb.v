@@ -12,8 +12,10 @@ reg signed [31:0] acc_in;
 wire signed [31:0] acc_out;
 
 integer errors;
+integer i;
+reg signed [31:0] exp;
 
-// DUT INSTANTIATION (VERY IMPORTANT)
+// DUT
 mac dut (
     .clk(clk),
     .rst_n(rst_n),
@@ -23,38 +25,83 @@ mac dut (
     .acc_out(acc_out)
 );
 
-// CLOCK GENERATION (VERY IMPORTANT)
+// clock
 always #5 clk = ~clk;
+
+// reference model (NO TASK DEPENDENCY ISSUES)
+function signed [31:0] expected;
+    input signed [15:0] a;
+    input signed [15:0] b;
+    input signed [31:0] acc;
+begin
+    expected = acc + (a * b);
+end
+endfunction
 
 initial begin
     clk = 0;
     errors = 0;
 
+    // reset
     rst_n = 0;
     a = 0;
     b = 0;
     acc_in = 0;
 
-    // reset phase
     repeat(2) @(posedge clk);
     rst_n = 1;
 
-    // APPLY INPUT
-    a = 2;
-    b = 3;
-    acc_in = 0;
-
-    // WAIT 1 CLOCK (MAC is sequential)
+    // ---------------------------
+    // TEST 1
+    // ---------------------------
+    a = 2; b = 3; acc_in = 0;
     @(posedge clk);
     #1;
+    exp = expected(2,3,0);
 
-    // CHECK OUTPUT
-    if (acc_out !== 6) begin
-        $display("FAIL got=%0d expected=6", acc_out);
+    if (acc_out !== exp) begin
+        $display("FAIL exp=%0d got=%0d", exp, acc_out);
         errors = errors + 1;
-    end else begin
-        $display("PASS got=%0d", acc_out);
-    end
+    end else
+        $display("PASS %0d", acc_out);
+
+    // ---------------------------
+    // TEST 2
+    // ---------------------------
+    a = 5; b = 4; acc_in = 10;
+    @(posedge clk);
+    #1;
+    exp = expected(5,4,10);
+
+    if (acc_out !== exp) begin
+        $display("FAIL exp=%0d got=%0d", exp, acc_out);
+        errors = errors + 1;
+    end else
+        $display("PASS %0d", acc_out);
+
+    // ---------------------------
+    // TEST 3
+    // ---------------------------
+    a = -2; b = 3; acc_in = 0;
+    @(posedge clk);
+    #1;
+    exp = expected(-2,3,0);
+
+    if (acc_out !== exp) begin
+        $display("FAIL exp=%0d got=%0d", exp, acc_out);
+        errors = errors + 1;
+    end else
+        $display("PASS %0d", acc_out);
+
+    // ---------------------------
+    // RESULT
+    // ---------------------------
+    repeat(2) @(posedge clk);
+
+    if (errors == 0)
+        $display("ALL TESTS PASSED");
+    else
+        $display("FAILURES = %0d", errors);
 
     $finish;
 end
